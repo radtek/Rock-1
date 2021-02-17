@@ -109,7 +109,7 @@ public class Lava : IHttpHandler
         var url = "/" + string.Join( "", request.Url.Segments.SkipWhile( s => !s.EndsWith( ".ashx", StringComparison.InvariantCultureIgnoreCase ) && !s.EndsWith( ".ashx/", StringComparison.InvariantCultureIgnoreCase ) ).Skip( 1 ).ToArray() );
 
         var dt = DefinedTypeCache.Get( Rock.SystemGuid.DefinedType.WEBHOOK_TO_LAVA.AsGuid() );
-        if ( dt != null )
+        if ( dt != null && dt.IsActive )
         {
             foreach ( DefinedValueCache api in dt.DefinedValues.OrderBy( h => h.Order ) )
             {
