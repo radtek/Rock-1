@@ -55,7 +55,7 @@ namespace Rock.Lava
         /// </summary>
         /// <param name="mergeFields"></param>
         /// <returns></returns>
-        public abstract ILavaRenderContext NewContext( IDictionary<string, object> mergeFields = null );
+        public abstract ILavaRenderContext NewRenderContext( IDictionary<string, object> mergeFields = null );
 
         private ILavaTemplateCacheService _cacheService;
 
@@ -284,7 +284,7 @@ namespace Rock.Lava
 
             if ( mergeFields != null )
             {
-                context = NewContext();
+                context = NewRenderContext();
 
                 context.SetMergeFields( mergeFields );
             }
@@ -330,7 +330,7 @@ namespace Rock.Lava
 
                 if ( context == null )
                 {
-                    context = NewContext();
+                    context = NewRenderContext();
                 }
 
                 var parameters = new LavaRenderParameters { Context = context };
