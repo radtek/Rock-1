@@ -104,7 +104,7 @@ namespace RockWeb.Blocks.CheckIn
 
         #endregion PageParameterKeys
 
-        protected override bool LoadUnencryptedCookie { get; set; } = true;
+        protected override bool LoadUnencryptedLocalDeviceConfig { get; set; } = true;
 
         /// <summary>
         /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
