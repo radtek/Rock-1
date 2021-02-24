@@ -183,7 +183,7 @@ namespace Rock.CheckIn
             */
 
             var localDeviceConfigCookie = page.Request.Cookies[CheckInCookieKey.LocalDeviceConfig]?.Value ?? string.Empty;
-            if ( localDeviceConfigCookie.IsNotNullOrWhiteSpace() && localDeviceConfigCookie.Contains( "CurrentKioskId" ) )
+            if ( loadUnencryptedCookie && localDeviceConfigCookie.IsNotNullOrWhiteSpace() && localDeviceConfigCookie.Contains( "CurrentKioskId" ) )
             {
                 return localDeviceConfigCookie.FromJsonOrNull<LocalDeviceConfiguration>();
             }
