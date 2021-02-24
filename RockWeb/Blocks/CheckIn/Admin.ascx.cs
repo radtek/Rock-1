@@ -19,7 +19,6 @@ using System.ComponentModel;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Rock;
@@ -111,6 +110,22 @@ namespace RockWeb.Blocks.CheckIn
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnLoad( EventArgs e )
         {
+            /*
+                02.24.2021 MSB
+                Asana: REF# 20210224-MSB1
+                As of v13 the cookie is now encrypted, but for this page we want to be able to handle the old
+                unencrypted cookie. So we look for it and encrypt it if it exists.
+
+                Reason: Backwards Compatibility
+            */
+
+            var localDevicConfiguration = Request.Cookies[CheckInCookieKey.LocalDeviceConfig]?.Value ?? string.Empty;
+            if ( localDevicConfiguration.IsNotNullOrWhiteSpace() && localDevicConfiguration.Contains( "CurrentKioskId" ) )
+            {
+                var tempLocalDeviceConfiguration = localDevicConfiguration.FromJsonOrNull<LocalDeviceConfiguration>();
+                tempLocalDeviceConfiguration.SaveToCookie();
+            }
+
             RockPage.AddScriptLink( "~/Blocks/CheckIn/Scripts/geo-min.js" );
             RockPage.AddScriptLink( "~/Scripts/CheckinClient/checkin-core.js" );
 
@@ -211,7 +226,7 @@ namespace RockWeb.Blocks.CheckIn
                 ddlKiosk.DataSource = new DeviceService( rockContext )
                     .Queryable().AsNoTracking()
                     .Where( d => d.DeviceTypeValueId == kioskDeviceTypeValueId
-                    && d.IsActive)
+                    && d.IsActive )
                     .OrderBy( d => d.Name )
                     .Select( d => new
                     {
@@ -535,8 +550,7 @@ tryGeoLocation();
             if ( LocalDeviceConfig.CurrentTheme != theme )
             {
                 LocalDeviceConfig.CurrentTheme = ddlTheme.SelectedValue;
-                var localDeviceConfigValue = this.LocalDeviceConfig.ToJson( Newtonsoft.Json.Formatting.None );
-                Rock.Web.UI.RockPage.AddOrUpdateCookie( CheckInCookieKey.LocalDeviceConfig, localDeviceConfigValue, RockDateTime.Now.AddYears( 1 ) );
+                LocalDeviceConfig.SaveToCookie();
             }
 
             if ( !RockPage.Site.Theme.Equals( LocalDeviceConfig.CurrentTheme, StringComparison.OrdinalIgnoreCase ) )

@@ -17,8 +17,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rock.Web.Cache;
-using static Rock.Security.Authorization;
+using Rock.Security;
+using Rock.Web.UI;
 
 namespace Rock.CheckIn
 {
@@ -135,12 +135,24 @@ namespace Rock.CheckIn
         /// Saves the LocalDeviceConfig to the cookie.
         /// </summary>
         /// <param name="page">The page.</param>
-        [Obsolete( "Use Rock.Web.UI.RockPage.AddOrUpdateCookie instead." )]
+        [Obsolete( "Use SaveToCookie( ) instead." )]
         [RockObsolete( "1.12" )]
         public void SaveToCookie( System.Web.UI.Page page )
         {
+            SaveToCookie();
+        }
+
+        /// <summary>
+        /// Saves to cookie.
+        /// We are now encrypting this cookie see Asana: REF# 20210224-MSB1 for details.
+        /// </summary>
+        /// <param name="page">The page.</param>
+        public void SaveToCookie()
+        {
             var localDeviceConfigValue = this.ToJson( Newtonsoft.Json.Formatting.None );
-            Rock.Web.UI.RockPage.AddOrUpdateCookie( CheckInCookieKey.LocalDeviceConfig, localDeviceConfigValue, RockDateTime.Now.AddYears( 1 ) );
+            var encryptedValue = Encryption.EncryptString( localDeviceConfigValue );
+
+            RockPage.AddOrUpdateCookie( CheckInCookieKey.LocalDeviceConfig, encryptedValue, RockDateTime.Now.AddYears( 1 ) );
         }
 
         /// <summary>
@@ -148,11 +160,14 @@ namespace Rock.CheckIn
         /// </summary>
         /// <param name="page">The page.</param>
         /// <returns></returns>
-        public LocalDeviceConfiguration GetFromCookie( System.Web.UI.Page page )
+        public LocalDeviceConfiguration GetFromCookie( System.Web.UI.Page page)
         {
             var localDeviceConfigCookie = page.Request.Cookies[CheckInCookieKey.LocalDeviceConfig];
-            return localDeviceConfigCookie?.Value?.FromJsonOrNull<LocalDeviceConfiguration>();
+            var decryptedValue = Encryption.DecryptString( localDeviceConfigCookie?.Value ?? string.Empty );
+
+            return decryptedValue.FromJsonOrNull<LocalDeviceConfiguration>();
         }
+
     }
 
     /// <summary>
