@@ -104,28 +104,14 @@ namespace RockWeb.Blocks.CheckIn
 
         #endregion PageParameterKeys
 
+        protected override bool LoadUnencryptedCookie { get; set; } = true;
+
         /// <summary>
         /// Raises the <see cref="E:System.Web.UI.Control.Load" /> event.
         /// </summary>
         /// <param name="e">The <see cref="T:System.EventArgs" /> object that contains the event data.</param>
         protected override void OnLoad( EventArgs e )
         {
-            /*
-                02.24.2021 MSB
-                Asana: REF# 20210224-MSB1
-                As of v13 the cookie is now encrypted, but for this page we want to be able to handle the old
-                unencrypted cookie. So we look for it and encrypt it if it exists.
-
-                Reason: Backwards Compatibility
-            */
-
-            var localDevicConfiguration = Request.Cookies[CheckInCookieKey.LocalDeviceConfig]?.Value ?? string.Empty;
-            if ( localDevicConfiguration.IsNotNullOrWhiteSpace() && localDevicConfiguration.Contains( "CurrentKioskId" ) )
-            {
-                var tempLocalDeviceConfiguration = localDevicConfiguration.FromJsonOrNull<LocalDeviceConfiguration>();
-                tempLocalDeviceConfiguration.SaveToCookie();
-            }
-
             RockPage.AddScriptLink( "~/Blocks/CheckIn/Scripts/geo-min.js" );
             RockPage.AddScriptLink( "~/Scripts/CheckinClient/checkin-core.js" );
 

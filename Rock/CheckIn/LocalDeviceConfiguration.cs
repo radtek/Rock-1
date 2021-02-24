@@ -162,12 +162,36 @@ namespace Rock.CheckIn
         /// <returns></returns>
         public LocalDeviceConfiguration GetFromCookie( System.Web.UI.Page page)
         {
-            var localDeviceConfigCookie = page.Request.Cookies[CheckInCookieKey.LocalDeviceConfig];
-            var decryptedValue = Encryption.DecryptString( localDeviceConfigCookie?.Value ?? string.Empty );
+            return GetFromCookie( page, false );
+        }
+
+        /// <summary>
+        /// Gets from cookie.
+        /// </summary>
+        /// <param name="page">The page.</param>
+        /// <param name="loadUnencryptedCookie">if set to <c>true</c> [load unencrypted cookie].</param>
+        /// <returns></returns>
+        public LocalDeviceConfiguration GetFromCookie( System.Web.UI.Page page, bool loadUnencryptedCookie )
+        {
+            /*
+                02.24.2021 MSB
+                Asana: REF# 20210224-MSB1
+                As of v13 the cookie is now encrypted, but for this page we want to be able to handle the old
+                unencrypted cookie. So we look for it and encrypt it if it exists.
+
+                Reason: Backwards Compatibility
+            */
+
+            var localDeviceConfigCookie = page.Request.Cookies[CheckInCookieKey.LocalDeviceConfig]?.Value ?? string.Empty;
+            if ( localDeviceConfigCookie.IsNotNullOrWhiteSpace() && localDeviceConfigCookie.Contains( "CurrentKioskId" ) )
+            {
+                return localDeviceConfigCookie.FromJsonOrNull<LocalDeviceConfiguration>();
+            }
+
+            var decryptedValue = Encryption.DecryptString( localDeviceConfigCookie );
 
             return decryptedValue.FromJsonOrNull<LocalDeviceConfiguration>();
         }
-
     }
 
     /// <summary>

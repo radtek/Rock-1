@@ -111,6 +111,14 @@ namespace Rock.CheckIn
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether [load unencrypted cookie].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [load unencrypted cookie]; otherwise, <c>false</c>.
+        /// </value>
+        protected virtual bool LoadUnencryptedCookie { get; set; } = false;
+
+        /// <summary>
         /// The current kiosk id
         /// </summary>
         [Obsolete( "Use LocalDeviceConfig..." )]
@@ -871,7 +879,7 @@ namespace Rock.CheckIn
         /// </summary>
         private void GetState()
         {
-            this.LocalDeviceConfig = LocalDeviceConfig.GetFromCookie( this.Page );
+            this.LocalDeviceConfig = LocalDeviceConfig.GetFromCookie( Page, LoadUnencryptedCookie );
 
             if ( this.LocalDeviceConfig == null )
             {
